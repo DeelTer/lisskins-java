@@ -1,11 +1,11 @@
 package ru.deelter.lisskins.model;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * Ответ на запрос поиска скинов.
@@ -22,6 +22,7 @@ import java.util.List;
  */
 @Data
 @Builder
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchResponse {
@@ -30,6 +31,7 @@ public class SearchResponse {
 
     @Data
     @Builder
+    @Jacksonized
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SearchMeta {

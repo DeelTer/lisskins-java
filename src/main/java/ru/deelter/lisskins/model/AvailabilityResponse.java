@@ -1,15 +1,16 @@
 package ru.deelter.lisskins.model;
 
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.Map;
+import lombok.extern.jackson.Jacksonized;
 
 @Data
 @Builder
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class AvailabilityResponse {
@@ -21,14 +22,10 @@ public class AvailabilityResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AvailabilityData {
-        /**
-         * Скины, которые доступны для покупки + их актуальная цена
-         */
+        /** Скины, которые доступны для покупки + их актуальная цена */
         private Map<String, Double> availableSkins;
 
-        /**
-         * ID скинов, которые недоступны для покупки
-         */
+        /** ID скинов, которые недоступны для покупки */
         private List<Integer> unavailableSkinIds;
     }
 }

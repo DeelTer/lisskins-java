@@ -1,12 +1,13 @@
 package ru.deelter.lisskins.exceptions;
 
+import java.io.IOException;
+import lombok.Getter;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import retrofit2.Response;
 
-import java.io.IOException;
-
+@Getter
 public class LisskinsApiException extends RuntimeException {
 
     private final int code;
@@ -42,13 +43,5 @@ public class LisskinsApiException extends RuntimeException {
         } catch (IOException e) {
             return "Failed to read error body";
         }
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getErrorBody() {
-        return errorBody;
     }
 }

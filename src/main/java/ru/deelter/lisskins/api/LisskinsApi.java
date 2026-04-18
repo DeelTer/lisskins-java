@@ -1,11 +1,13 @@
 package ru.deelter.lisskins.api;
 
-import retrofit2.Call;
-import retrofit2.http.*;
-import ru.deelter.lisskins.model.*;
-
 import java.util.List;
 import java.util.Map;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Query;
+import ru.deelter.lisskins.model.*;
 
 public interface LisskinsApi {
 
@@ -16,25 +18,28 @@ public interface LisskinsApi {
     Call<BuyResponse> buy(@Body BuyRequest request);
 
     @GET("market/search")
-    Call<SearchResponse> search(@Query("game") String game,
-                                @Query("price_from") Double priceFrom,
-                                @Query("price_to") Double priceTo,
-                                @Query("float_from") Double floatFrom,
-                                @Query("float_to") Double floatTo,
-                                @Query("only_unlocked") Integer onlyUnlocked,
-                                @Query("sort_by") String sortBy,
-                                @Query("cursor") String cursor,
-                                @Query("names[]") List<String> names,
-                                @Query("unlock_days[]") List<Integer> unlockDays);
+    Call<SearchResponse> search(
+            @Query("game") String game,
+            @Query("price_from") Double priceFrom,
+            @Query("price_to") Double priceTo,
+            @Query("float_from") Double floatFrom,
+            @Query("float_to") Double floatTo,
+            @Query("only_unlocked") Integer onlyUnlocked,
+            @Query("sort_by") String sortBy,
+            @Query("cursor") String cursor,
+            @Query("names[]") List<String> names,
+            @Query("unlock_days[]") List<Integer> unlockDays);
 
     @GET("market/info")
-    Call<InfoResponse> getInfo(@Query("custom_ids[]") List<String> customIds,
-                               @Query("purchase_ids[]") List<Integer> purchaseIds);
+    Call<InfoResponse> getInfo(
+            @Query("custom_ids[]") List<String> customIds,
+            @Query("purchase_ids[]") List<Integer> purchaseIds);
 
     @GET("market/history")
-    Call<HistoryResponse> getHistory(@Query("page") Integer page,
-                                     @Query("start_unix_time") Long startTime,
-                                     @Query("end_unix_time") Long endTime);
+    Call<HistoryResponse> getHistory(
+            @Query("page") Integer page,
+            @Query("start_unix_time") Long startTime,
+            @Query("end_unix_time") Long endTime);
 
     @POST("market/withdraw-all")
     Call<WithdrawResponse> withdrawAll(@Body Map<String, Object> body);

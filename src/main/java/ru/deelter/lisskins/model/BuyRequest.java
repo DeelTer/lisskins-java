@@ -1,11 +1,12 @@
 package ru.deelter.lisskins.model;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.extern.jackson.Jacksonized;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Запрос на покупку скинов.
@@ -23,12 +24,13 @@ import java.util.List;
  */
 @Data
 @Builder
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class BuyRequest {
 
     /** ID скинов (максимум 100). */
-    private List<Integer> ids;
+    @NotNull private List<Integer> ids;
 
     /** Значение "partner" из Trade URL Steam. */
     private String partner;

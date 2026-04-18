@@ -1,9 +1,12 @@
 package ru.deelter.lisskins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.jetbrains.annotations.NotNull;
@@ -26,14 +29,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Основной клиент для работы с LIS-SKINS API.
- * <p>
- * Предоставляет синхронные и асинхронные методы для всех операций:
- * получение баланса, покупка скинов, поиск, проверка доступности,
- * получение информации о покупках, история, вывод средств и возврат.
- * </p>
- * <p>
- * WebSocket-соединение включается опционально: передайте {@code userId} в билдер.
- * </p>
+ *
+ * <p>Предоставляет синхронные и асинхронные методы для всех операций: получение баланса, покупка
+ * скинов, поиск, проверка доступности, получение информации о покупках, история, вывод средств и
+ * возврат.
+ *
+ * <p>WebSocket-соединение включается опционально: передайте {@code userId} в билдер.
  *
  * <pre>{@code
  * LisskinsClient client = LisskinsClient.builder()
@@ -44,6 +45,8 @@ import java.util.concurrent.TimeUnit;
  * }</pre>
  */
 @Getter
+@Slf4j
+@ToString(exclude = "apiKey")
 public class LisskinsClient {
 
 	private final LisskinsApi api;
@@ -58,32 +61,42 @@ public class LisskinsClient {
 		this.apiKey = apiKey;
 
 		HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-		logging.setLevel(debug ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
+		logging.setLevel(
+				debug ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
 
-		OkHttpClient okHttpClient = new OkHttpClient.Builder()
-				.addInterceptor(logging)
-				.addInterceptor(chain -> chain.proceed(chain.request().newBuilder()
-						.addHeader("Authorization", "Bearer " + apiKey)
-						.build()))
-				.addInterceptor(new RateLimitRetryInterceptor(3))
-				.connectTimeout(30, TimeUnit.SECONDS)
-				.readTimeout(30, TimeUnit.SECONDS)
-				.build();
+		OkHttpClient okHttpClient =
+				new OkHttpClient.Builder()
+						.addInterceptor(logging)
+						.addInterceptor(
+								chain ->
+										chain.proceed(
+												chain.request()
+														.newBuilder()
+														.addHeader(
+																"Authorization", "Bearer " + apiKey)
+														.build()))
+						.addInterceptor(new RateLimitRetryInterceptor(3))
+						.connectTimeout(30, TimeUnit.SECONDS)
+						.readTimeout(30, TimeUnit.SECONDS)
+						.build();
 
-		ObjectMapper mapper = new ObjectMapper()
-				.registerModule(new JavaTimeModule())
-				.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		ObjectMapper mapper =
+				new ObjectMapper()
+						.registerModule(new JavaTimeModule())
+						.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-		Retrofit retrofit = new Retrofit.Builder()
-				.baseUrl("https://api.lis-skins.com/v1/")
-				.client(okHttpClient)
-				.addConverterFactory(JacksonConverterFactory.create(mapper))
-				.build();
+		Retrofit retrofit =
+				new Retrofit.Builder()
+						.baseUrl("https://api.lis-skins.com/v1/")
+						.client(okHttpClient)
+						.addConverterFactory(JacksonConverterFactory.create(mapper))
+						.build();
 
 		this.api = retrofit.create(LisskinsApi.class);
-		this.webSocketManager = (userId != null && !userId.isBlank())
-				? new LisskinsWebSocketManager(this, userId)
-				: null;
+		this.webSocketManager =
+				(userId != null && !userId.isBlank())
+						? new LisskinsWebSocketManager(this, userId)
+						: null;
 	}
 
 	/**
@@ -108,18 +121,18 @@ public class LisskinsClient {
 	 * @param request параметры поиска
 	 */
 	public SearchResponse search(@NotNull SearchRequest request) {
-		return executeSync(api.search(
-				request.getGame(),
-				request.getPriceFrom(),
-				request.getPriceTo(),
-				request.getFloatFrom(),
-				request.getFloatTo(),
-				request.getOnlyUnlocked(),
-				request.getSortBy(),
-				request.getCursor(),
-				request.getNames(),
-				request.getUnlockDays()
-		));
+		return executeSync(
+				api.search(
+						request.getGame(),
+						request.getPriceFrom(),
+						request.getPriceTo(),
+						request.getFloatFrom(),
+						request.getFloatTo(),
+						request.getOnlyUnlocked(),
+						request.getSortBy(),
+						request.getCursor(),
+						request.getNames(),
+						request.getUnlockDays()));
 	}
 
 	/**
@@ -132,26 +145,27 @@ public class LisskinsClient {
 	/**
 	 * Получает информацию о покупках по custom_id или purchase_id.
 	 */
-	public InfoResponse getInfo(@Nullable List<String> customIds, @Nullable List<Integer> purchaseIds) {
+	public InfoResponse getInfo(
+			@Nullable List<String> customIds, @Nullable List<Integer> purchaseIds) {
 		return executeSync(api.getInfo(customIds, purchaseIds));
 	}
 
 	/**
 	 * История покупок с пагинацией.
 	 */
-	public HistoryResponse getHistory(@Nullable Integer page,
-	                                  @Nullable Long startUnixTime,
-	                                  @Nullable Long endUnixTime) {
+	public HistoryResponse getHistory(
+			@Nullable Integer page, @Nullable Long startUnixTime, @Nullable Long endUnixTime) {
 		return executeSync(api.getHistory(page, startUnixTime, endUnixTime));
 	}
 
 	/**
 	 * Вывод всех разблокированных скинов (можно указать конкретные покупки).
 	 */
-	public WithdrawResponse withdrawAll(@Nullable List<String> customIds,
-	                                    @Nullable List<Integer> purchaseIds,
-	                                    @Nullable String partner,
-	                                    @Nullable String token) {
+	public WithdrawResponse withdrawAll(
+			@Nullable List<String> customIds,
+			@Nullable List<Integer> purchaseIds,
+			@Nullable String partner,
+			@Nullable String token) {
 		Map<String, Object> body = new HashMap<>();
 		if (customIds != null) body.put("custom_ids[]", customIds);
 		if (purchaseIds != null) body.put("purchase_ids[]", purchaseIds);
@@ -163,10 +177,11 @@ public class LisskinsClient {
 	/**
 	 * Вывод скинов из конкретной покупки.
 	 */
-	public WithdrawResponse withdraw(@Nullable String customId,
-	                                 @Nullable Integer purchaseId,
-	                                 @Nullable String partner,
-	                                 @Nullable String token) {
+	public WithdrawResponse withdraw(
+			@Nullable String customId,
+			@Nullable Integer purchaseId,
+			@Nullable String partner,
+			@Nullable String token) {
 		Map<String, Object> body = new HashMap<>();
 		if (customId != null) body.put("custom_id", customId);
 		if (purchaseId != null) body.put("purchase_id", purchaseId);
@@ -178,9 +193,8 @@ public class LisskinsClient {
 	/**
 	 * Возврат заблокированного скина (с комиссией 3%).
 	 */
-	public ReturnResponse returnSkin(@Nullable String customId,
-	                                 @Nullable Integer purchaseId,
-	                                 @Nullable Integer skinId) {
+	public ReturnResponse returnSkin(
+			@Nullable String customId, @Nullable Integer purchaseId, @Nullable Integer skinId) {
 		Map<String, Object> body = new HashMap<>();
 		if (customId != null) body.put("custom_id", customId);
 		if (purchaseId != null) body.put("purchase_id", purchaseId);
@@ -205,32 +219,31 @@ public class LisskinsClient {
 	}
 
 	public CompletableFuture<SearchResponse> searchAsync(@NotNull SearchRequest request) {
-		return executeAsync(api.search(
-				request.getGame(),
-				request.getPriceFrom(),
-				request.getPriceTo(),
-				request.getFloatFrom(),
-				request.getFloatTo(),
-				request.getOnlyUnlocked(),
-				request.getSortBy(),
-				request.getCursor(),
-				request.getNames(),
-				request.getUnlockDays()
-		));
+		return executeAsync(
+				api.search(
+						request.getGame(),
+						request.getPriceFrom(),
+						request.getPriceTo(),
+						request.getFloatFrom(),
+						request.getFloatTo(),
+						request.getOnlyUnlocked(),
+						request.getSortBy(),
+						request.getCursor(),
+						request.getNames(),
+						request.getUnlockDays()));
 	}
 
 	public CompletableFuture<AvailabilityResponse> checkAvailabilityAsync(List<Integer> ids) {
 		return executeAsync(api.checkAvailability(ids));
 	}
 
-	public CompletableFuture<InfoResponse> getInfoAsync(@Nullable List<String> customIds,
-	                                                    @Nullable List<Integer> purchaseIds) {
+	public CompletableFuture<InfoResponse> getInfoAsync(
+			@Nullable List<String> customIds, @Nullable List<Integer> purchaseIds) {
 		return executeAsync(api.getInfo(customIds, purchaseIds));
 	}
 
-	public CompletableFuture<HistoryResponse> getHistoryAsync(@Nullable Integer page,
-	                                                          @Nullable Long startUnixTime,
-	                                                          @Nullable Long endUnixTime) {
+	public CompletableFuture<HistoryResponse> getHistoryAsync(
+			@Nullable Integer page, @Nullable Long startUnixTime, @Nullable Long endUnixTime) {
 		return executeAsync(api.getHistory(page, startUnixTime, endUnixTime));
 	}
 
@@ -246,6 +259,7 @@ public class LisskinsClient {
 			}
 			return response.body();
 		} catch (IOException e) {
+			log.error("API request failed", e);
 			throw new LisskinsApiException(e);
 		}
 	}
@@ -253,21 +267,24 @@ public class LisskinsClient {
 	@NotNull
 	private <T> CompletableFuture<T> executeAsync(@NotNull Call<T> call) {
 		CompletableFuture<T> future = new CompletableFuture<>();
-		call.enqueue(new retrofit2.Callback<T>() {
-			@Override
-			public void onResponse(@NotNull Call<T> call, @NotNull retrofit2.Response<T> response) {
-				if (response.isSuccessful()) {
-					future.complete(response.body());
-				} else {
-					future.completeExceptionally(new LisskinsApiException(response));
-				}
-			}
+		call.enqueue(
+				new retrofit2.Callback<T>() {
+					@Override
+					public void onResponse(
+							@NotNull Call<T> call, @NotNull retrofit2.Response<T> response) {
+						if (response.isSuccessful()) {
+							future.complete(response.body());
+						} else {
+							future.completeExceptionally(new LisskinsApiException(response));
+						}
+					}
 
-			@Override
-			public void onFailure(@NotNull Call<T> call, @NotNull Throwable t) {
-				future.completeExceptionally(new LisskinsApiException(t));
-			}
-		});
+					@Override
+					public void onFailure(@NotNull Call<T> call, @NotNull Throwable t) {
+						log.error("Async API request failed", t);
+						future.completeExceptionally(new LisskinsApiException(t));
+					}
+				});
 		return future;
 	}
 }

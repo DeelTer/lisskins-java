@@ -1,12 +1,17 @@
 package ru.deelter.lisskins.model;
 
+import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
+import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 @Getter
 @Builder
+@Jacksonized
+@NoArgsConstructor
+@AllArgsConstructor
 public class SearchRequest {
     private String game;
     private Double priceFrom;
