@@ -37,7 +37,7 @@ Add the dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.DeelTer</groupId>
     <artifactId>lisskins-java</artifactId>
-    <version>Tag</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
