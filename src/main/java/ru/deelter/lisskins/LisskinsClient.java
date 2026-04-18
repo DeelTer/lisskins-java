@@ -86,7 +86,8 @@ public class LisskinsClient {
 				.registerModule(new JavaTimeModule())
 				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+				.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 
 		Retrofit retrofit =
 				new Retrofit.Builder()
