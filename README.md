@@ -27,19 +27,17 @@ Supports synchronous and asynchronous operations, WebSocket real-time events, au
 Add the dependency to your `pom.xml`:
 
 ```xml
-<dependency>
-    <groupId>ru.deelter.lisskins</groupId>
-    <artifactId>lisskins-client</artifactId>
-    <version>1.0.0</version>
-</dependency>
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
 
-Add dependency to your `pom.xml`:
-
-```xml
 <dependency>
-    <groupId>ru.deelter.lisskins</groupId>
-    <artifactId>lisskins-client</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.github.DeelTer</groupId>
+    <artifactId>lisskins-java</artifactId>
+    <version>Tag</version>
 </dependency>
 ```
 
