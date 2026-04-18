@@ -6,7 +6,7 @@
 
   <groupId>ru.deelter.lisskins</groupId>
   <artifactId>lisskins-client</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <packaging>jar</packaging>
 
   <name>Lisskins Java Client</name>

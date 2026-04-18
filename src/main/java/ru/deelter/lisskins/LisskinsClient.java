@@ -1,5 +1,6 @@
 package ru.deelter.lisskins;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -84,7 +85,8 @@ public class LisskinsClient {
 		ObjectMapper mapper = new ObjectMapper()
 				.registerModule(new JavaTimeModule())
 				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-				.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+				.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		Retrofit retrofit =
 				new Retrofit.Builder()
