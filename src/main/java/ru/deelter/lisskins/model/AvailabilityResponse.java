@@ -2,6 +2,9 @@ package ru.deelter.lisskins.model;
 
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +16,7 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AvailabilityResponse {
 
     private AvailabilityData data;
@@ -21,6 +25,7 @@ public class AvailabilityResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class AvailabilityData {
         /** Скины, которые доступны для покупки + их актуальная цена */
         private Map<String, Double> availableSkins;

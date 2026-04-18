@@ -1,6 +1,7 @@
 package ru.deelter.lisskins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Builder;
@@ -80,10 +81,10 @@ public class LisskinsClient {
 						.readTimeout(30, TimeUnit.SECONDS)
 						.build();
 
-		ObjectMapper mapper =
-				new ObjectMapper()
-						.registerModule(new JavaTimeModule())
-						.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		ObjectMapper mapper = new ObjectMapper()
+				.registerModule(new JavaTimeModule())
+				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+				.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
 		Retrofit retrofit =
 				new Retrofit.Builder()
