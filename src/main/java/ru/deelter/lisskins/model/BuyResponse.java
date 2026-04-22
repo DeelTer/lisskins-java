@@ -9,19 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * Ответ на запрос покупки.
- *
- * <pre>{@code
- * {
- *   "data": {
- *     "purchase_id": 55,
- *     "steam_id": "76561198050648523",
- *     "created_at": "2024-07-22T14:50:08.000000Z",
- *     "custom_id": null,
- *     "skins": [ ... ]
- *   }
- * }
- * }</pre>
+ * Response for a purchase request.
  */
 @Data
 @Builder
@@ -30,5 +18,9 @@ import lombok.extern.jackson.Jacksonized;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BuyResponse {
-    private Purchase data;
+
+	/**
+	 * Data of the created purchase.
+	 */
+	private Purchase data;
 }

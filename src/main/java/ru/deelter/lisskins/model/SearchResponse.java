@@ -1,7 +1,5 @@
 package ru.deelter.lisskins.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
@@ -10,18 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
+import java.util.List;
+
 /**
- * Ответ на запрос поиска скинов.
- *
- * <pre>{@code
- * {
- *   "data": [ ... ],
- *   "meta": {
- *     "per_page": 200,
- *     "next_cursor": "eyJvYnRhaW5lZF9za2lucy5pZCI6NDY5MjAy..."
- *   }
- * }
- * }</pre>
+ * Response for a skin search request.
  */
 @Data
 @Builder
@@ -30,16 +20,35 @@ import lombok.extern.jackson.Jacksonized;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class SearchResponse {
-    private List<Skin> data;
-    private SearchMeta meta;
 
-    @Data
-    @Builder
-    @Jacksonized
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class SearchMeta {
-        private String nextCursor;
-        private Integer perPage;
-    }
+	/**
+	 * List of found skins.
+	 */
+	private List<Skin> data;
+
+	/**
+	 * Pagination metadata.
+	 */
+	private SearchMeta meta;
+
+	/**
+	 * Pagination metadata.
+	 */
+	@Data
+	@Builder
+	@Jacksonized
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class SearchMeta {
+
+		/**
+		 * Cursor for retrieving the next page of results.
+		 */
+		private String nextCursor;
+
+		/**
+		 * Number of items per page.
+		 */
+		private Integer perPage;
+	}
 }

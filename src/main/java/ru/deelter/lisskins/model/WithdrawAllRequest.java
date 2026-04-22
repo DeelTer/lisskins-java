@@ -7,12 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 /**
- * Purchase request.
+ * Request to withdraw all available skins.
  */
 @Data
 @Builder
@@ -20,36 +20,29 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class BuyRequest {
+public class WithdrawAllRequest {
 
 	/**
-	 * Skin IDs (maximum 100).
+	 * Custom order identifiers.
 	 */
-	@NotNull
-	private List<Integer> ids;
+	@Nullable
+	private List<String> customIds;
+
+	/**
+	 * Internal purchase identifiers.
+	 */
+	@Nullable
+	private List<Integer> purchaseIds;
 
 	/**
 	 * "partner" value from Steam Trade URL.
 	 */
+	@Nullable
 	private String partner;
 
 	/**
 	 * "token" value from Steam Trade URL.
 	 */
+	@Nullable
 	private String token;
-
-	/**
-	 * Maximum purchase price (optional).
-	 */
-	private Double maxPrice;
-
-	/**
-	 * Custom ID to prevent duplicate purchases.
-	 */
-	private String customId;
-
-	/**
-	 * Skip unavailable skins when bulk buying.
-	 */
-	private Boolean skipUnavailable;
 }

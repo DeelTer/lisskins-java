@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Sticker applied to a skin (CS2).
+ */
 @Data
 @Builder
 @Jacksonized
@@ -15,8 +18,24 @@ import lombok.extern.jackson.Jacksonized;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Sticker {
-    private String name;
-    private String image;
-    private Integer wear;
-    private Integer slot;
+
+	/**
+	 * Sticker name.
+	 */
+	private String name;
+
+	/**
+	 * URL of the sticker image.
+	 */
+	private String image;
+
+	/**
+	 * Sticker wear (0–100).
+	 */
+	private Integer wear;
+
+	/**
+	 * Slot where the sticker is applied (0–4).
+	 */
+	private Integer slot;
 }

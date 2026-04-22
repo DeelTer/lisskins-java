@@ -23,26 +23,25 @@ import ru.deelter.lisskins.model.*;
 import ru.deelter.lisskins.websocket.LisskinsWebSocketManager;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Основной клиент для работы с LIS-SKINS API.
+ * Main client for interacting with the LIS-SKINS API.
  *
- * <p>Предоставляет синхронные и асинхронные методы для всех операций: получение баланса, покупка
- * скинов, поиск, проверка доступности, получение информации о покупках, история, вывод средств и
- * возврат.
+ * <p>Provides synchronous and asynchronous methods for all operations: checking balance,
+ * purchasing skins, searching, checking availability, retrieving purchase information,
+ * history, withdrawals, and returns.
  *
- * <p>WebSocket-соединение включается опционально: передайте {@code userId} в билдер.
+ * <p>WebSocket connection is optional: provide {@code userId} in the builder to enable it.
  *
  * <pre>{@code
  * LisskinsClient client = LisskinsClient.builder()
  *         .apiKey("your-api-key")
  *         .debug(true)
- *         .userId("12345") // для WebSocket
+ *         .userId("12345") // for WebSocket
  *         .build();
  * }</pre>
  */
@@ -58,7 +57,7 @@ public class LisskinsClient {
 	@Builder
 	public LisskinsClient(String apiKey, boolean debug, @Nullable String userId) {
 		if (apiKey == null || apiKey.isBlank()) {
-			throw new IllegalArgumentException("API Key обязателен");
+			throw new IllegalArgumentException("API Key is required");
 		}
 		this.apiKey = apiKey;
 
@@ -104,25 +103,29 @@ public class LisskinsClient {
 	}
 
 	/**
-	 * Возвращает текущий баланс пользователя.
+	 * Returns the current user balance.
+	 *
+	 * @return balance response
 	 */
 	public BalanceResponse getBalance() {
 		return executeSync(api.getBalance());
 	}
 
 	/**
-	 * Покупка одного или нескольких скинов.
+	 * Purchases one or more skins.
 	 *
-	 * @param request параметры покупки
+	 * @param request purchase parameters
+	 * @return purchase response
 	 */
 	public BuyResponse buy(BuyRequest request) {
 		return executeSync(api.buy(request));
 	}
 
 	/**
-	 * Поиск скинов по заданным критериям.
+	 * Searches for skins based on specified criteria.
 	 *
-	 * @param request параметры поиска
+	 * @param request search parameters
+	 * @return search response
 	 */
 	public SearchResponse search(@NotNull SearchRequest request) {
 		return executeSync(
@@ -136,18 +139,26 @@ public class LisskinsClient {
 						request.getSortBy(),
 						request.getCursor(),
 						request.getNames(),
-						request.getUnlockDays()));
+						request.getUnlockDays(),
+						request.getPerPage()));
 	}
 
 	/**
-	 * Проверяет доступность списка скинов по их ID.
+	 * Checks the availability of a list of skins by their IDs.
+	 *
+	 * @param ids list of skin IDs
+	 * @return availability response
 	 */
 	public AvailabilityResponse checkAvailability(List<Integer> ids) {
 		return executeSync(api.checkAvailability(ids));
 	}
 
 	/**
-	 * Получает информацию о покупках по custom_id или purchase_id.
+	 * Retrieves purchase information by custom_id or purchase_id.
+	 *
+	 * @param customIds   custom order identifiers (optional)
+	 * @param purchaseIds internal purchase identifiers (optional)
+	 * @return info response
 	 */
 	public InfoResponse getInfo(
 			@Nullable List<String> customIds, @Nullable List<Integer> purchaseIds) {
@@ -155,7 +166,12 @@ public class LisskinsClient {
 	}
 
 	/**
-	 * История покупок с пагинацией.
+	 * Retrieves purchase history with pagination.
+	 *
+	 * @param page          page number (optional)
+	 * @param startUnixTime start timestamp (optional)
+	 * @param endUnixTime   end timestamp (optional)
+	 * @return history response
 	 */
 	public HistoryResponse getHistory(
 			@Nullable Integer page, @Nullable Long startUnixTime, @Nullable Long endUnixTime) {
@@ -163,43 +179,62 @@ public class LisskinsClient {
 	}
 
 	/**
-	 * Вывод всех разблокированных скинов (можно указать конкретные покупки).
+	 * Withdraws all unlocked skins (specific purchases can be specified).
+	 *
+	 * @param customIds   custom order identifiers (optional)
+	 * @param purchaseIds internal purchase identifiers (optional)
+	 * @param partner     "partner" value from Steam Trade URL (optional)
+	 * @param token       "token" value from Steam Trade URL (optional)
+	 * @return withdraw response
 	 */
 	public WithdrawResponse withdrawAll(
 			@Nullable List<String> customIds,
 			@Nullable List<Integer> purchaseIds,
 			@Nullable String partner,
 			@Nullable String token) {
-		Map<String, Object> body = new HashMap<>();
-		if (customIds != null) body.put("custom_ids[]", customIds);
-		if (purchaseIds != null) body.put("purchase_ids[]", purchaseIds);
-		if (partner != null) body.put("partner", partner);
-		if (token != null) body.put("token", token);
-		return executeSync(api.withdrawAll(body));
+		WithdrawAllRequest request = WithdrawAllRequest.builder()
+				.customIds(customIds)
+				.purchaseIds(purchaseIds)
+				.partner(partner)
+				.token(token)
+				.build();
+		return executeSync(api.withdrawAll(request));
 	}
 
 	/**
-	 * Вывод скинов из конкретной покупки.
+	 * Withdraws skins from a specific purchase.
+	 *
+	 * @param customId   custom order identifier (optional)
+	 * @param purchaseId internal purchase identifier (optional)
+	 * @param partner    "partner" value from Steam Trade URL (optional)
+	 * @param token      "token" value from Steam Trade URL (optional)
+	 * @return withdraw response
 	 */
 	public WithdrawResponse withdraw(
 			@Nullable String customId,
 			@Nullable Integer purchaseId,
 			@Nullable String partner,
 			@Nullable String token) {
-		Map<String, Object> body = new HashMap<>();
-		if (customId != null) body.put("custom_id", customId);
-		if (purchaseId != null) body.put("purchase_id", purchaseId);
-		if (partner != null) body.put("partner", partner);
-		if (token != null) body.put("token", token);
-		return executeSync(api.withdraw(body));
+		WithdrawRequest request = WithdrawRequest.builder()
+				.customId(customId)
+				.purchaseId(purchaseId)
+				.partner(partner)
+				.token(token)
+				.build();
+		return executeSync(api.withdraw(request));
 	}
 
 	/**
-	 * Возврат заблокированного скина (с комиссией 3%).
+	 * Returns a locked skin (3% commission applies).
+	 *
+	 * @param customId   custom order identifier (optional)
+	 * @param purchaseId internal purchase identifier (optional)
+	 * @param skinId     skin identifier (optional)
+	 * @return return response
 	 */
 	public ReturnResponse returnSkin(
 			@Nullable String customId, @Nullable Integer purchaseId, @Nullable Integer skinId) {
-		Map<String, Object> body = new HashMap<>();
+		Map<String, Object> body = new java.util.HashMap<>();
 		if (customId != null) body.put("custom_id", customId);
 		if (purchaseId != null) body.put("purchase_id", purchaseId);
 		if (skinId != null) body.put("id", skinId);
@@ -207,21 +242,41 @@ public class LisskinsClient {
 	}
 
 	/**
-	 * Получение токена для WebSocket соединения.
+	 * Retrieves a token for WebSocket connection.
+	 *
+	 * @return WebSocket token response
 	 */
 	public WsTokenResponse getWsToken() {
 		return executeSync(api.getWsToken());
 	}
 
-	// Асинхронные методы
+	// Asynchronous methods
+
+	/**
+	 * Asynchronously returns the current user balance.
+	 *
+	 * @return future with balance response
+	 */
 	public CompletableFuture<BalanceResponse> getBalanceAsync() {
 		return executeAsync(api.getBalance());
 	}
 
+	/**
+	 * Asynchronously purchases one or more skins.
+	 *
+	 * @param request purchase parameters
+	 * @return future with purchase response
+	 */
 	public CompletableFuture<BuyResponse> buyAsync(BuyRequest request) {
 		return executeAsync(api.buy(request));
 	}
 
+	/**
+	 * Asynchronously searches for skins based on specified criteria.
+	 *
+	 * @param request search parameters
+	 * @return future with search response
+	 */
 	public CompletableFuture<SearchResponse> searchAsync(@NotNull SearchRequest request) {
 		return executeAsync(
 				api.search(
@@ -234,23 +289,50 @@ public class LisskinsClient {
 						request.getSortBy(),
 						request.getCursor(),
 						request.getNames(),
-						request.getUnlockDays()));
+						request.getUnlockDays(),
+						request.getPerPage()));
 	}
 
+	/**
+	 * Asynchronously checks the availability of a list of skins by their IDs.
+	 *
+	 * @param ids list of skin IDs
+	 * @return future with availability response
+	 */
 	public CompletableFuture<AvailabilityResponse> checkAvailabilityAsync(List<Integer> ids) {
 		return executeAsync(api.checkAvailability(ids));
 	}
 
+	/**
+	 * Asynchronously retrieves purchase information by custom_id or purchase_id.
+	 *
+	 * @param customIds   custom order identifiers (optional)
+	 * @param purchaseIds internal purchase identifiers (optional)
+	 * @return future with info response
+	 */
 	public CompletableFuture<InfoResponse> getInfoAsync(
 			@Nullable List<String> customIds, @Nullable List<Integer> purchaseIds) {
 		return executeAsync(api.getInfo(customIds, purchaseIds));
 	}
 
+	/**
+	 * Asynchronously retrieves purchase history with pagination.
+	 *
+	 * @param page          page number (optional)
+	 * @param startUnixTime start timestamp (optional)
+	 * @param endUnixTime   end timestamp (optional)
+	 * @return future with history response
+	 */
 	public CompletableFuture<HistoryResponse> getHistoryAsync(
 			@Nullable Integer page, @Nullable Long startUnixTime, @Nullable Long endUnixTime) {
 		return executeAsync(api.getHistory(page, startUnixTime, endUnixTime));
 	}
 
+	/**
+	 * Asynchronously retrieves a token for WebSocket connection.
+	 *
+	 * @return future with WebSocket token response
+	 */
 	public CompletableFuture<WsTokenResponse> getWsTokenAsync() {
 		return executeAsync(api.getWsToken());
 	}
@@ -261,7 +343,11 @@ public class LisskinsClient {
 			if (!response.isSuccessful()) {
 				throw new LisskinsApiException(response);
 			}
-			return response.body();
+			T body = response.body();
+			if (body == null) {
+				throw new LisskinsApiException("Empty response body for successful request");
+			}
+			return body;
 		} catch (IOException e) {
 			log.error("API request failed", e);
 			throw new LisskinsApiException(e);
@@ -277,7 +363,13 @@ public class LisskinsClient {
 					public void onResponse(
 							@NotNull Call<T> call, @NotNull retrofit2.Response<T> response) {
 						if (response.isSuccessful()) {
-							future.complete(response.body());
+							T body = response.body();
+							if (body == null) {
+								future.completeExceptionally(
+										new LisskinsApiException("Empty response body for successful request"));
+							} else {
+								future.complete(body);
+							}
 						} else {
 							future.completeExceptionally(new LisskinsApiException(response));
 						}

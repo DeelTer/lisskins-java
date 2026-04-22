@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Response containing a WebSocket connection token.
+ */
 @Data
 @Builder
 @Jacksonized
@@ -15,14 +18,19 @@ import lombok.extern.jackson.Jacksonized;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class WsTokenResponse {
-    private TokenData data;
 
-    @Data
-    @Builder
-    @Jacksonized
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TokenData {
-        private String token;
-    }
+	private TokenData data;
+
+	@Data
+	@Builder
+	@Jacksonized
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class TokenData {
+
+		/**
+		 * Token for Centrifugo authentication.
+		 */
+		private String token;
+	}
 }

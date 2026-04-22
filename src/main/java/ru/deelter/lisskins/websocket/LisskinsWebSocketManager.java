@@ -10,7 +10,7 @@ import ru.deelter.lisskins.model.WsTokenResponse;
 import java.util.function.Consumer;
 
 /**
- * Менеджер WebSocket соединений через Centrifugo.
+ * WebSocket connection manager via Centrifugo.
  */
 @Slf4j
 public class LisskinsWebSocketManager {
@@ -29,14 +29,27 @@ public class LisskinsWebSocketManager {
 		this.userId = userId;
 	}
 
+	/**
+	 * Sets a listener for market skin events (added, deleted, price changed).
+	 *
+	 * @param listener callback that receives the JSON event data
+	 */
 	public void setOnObtainedSkinListener(Consumer<String> listener) {
 		this.onObtainedSkinEvent = listener;
 	}
 
+	/**
+	 * Sets a listener for purchase status update events.
+	 *
+	 * @param listener callback that receives the JSON event data
+	 */
 	public void setOnPurchaseUpdateListener(Consumer<String> listener) {
 		this.onPurchaseUpdateEvent = listener;
 	}
 
+	/**
+	 * Establishes the WebSocket connection and subscribes to channels.
+	 */
 	public void connect() {
 		OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
@@ -80,6 +93,10 @@ public class LisskinsWebSocketManager {
 
 	private void onTokenReceived(@NotNull WsTokenResponse tokenResponse) {
 		String token = tokenResponse.getData().getToken();
+		if (token == null || token.isBlank()) {
+			log.error("Received empty WebSocket token, cannot connect.");
+			return;
+		}
 		centrifugeClient.setToken(token);
 		centrifugeClient.connect();
 	}
@@ -123,18 +140,27 @@ public class LisskinsWebSocketManager {
 		}
 	}
 
+	/**
+	 * Disconnects the WebSocket connection.
+	 */
 	public void disconnect() {
 		if (centrifugeClient != null) {
 			centrifugeClient.disconnect();
 		}
 	}
 
+	/**
+	 * Unsubscribes from the public obtained-skins channel.
+	 */
 	public void unsubscribeFromObtainedSkins() {
 		if (obtainedSkinsSub != null) {
 			obtainedSkinsSub.unsubscribe();
 		}
 	}
 
+	/**
+	 * Unsubscribes from the private purchase-skins channel.
+	 */
 	public void unsubscribeFromPurchasedSkins() {
 		if (purchaseSkinsSub != null) {
 			purchaseSkinsSub.unsubscribe();

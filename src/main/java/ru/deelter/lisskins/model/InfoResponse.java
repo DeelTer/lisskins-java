@@ -1,7 +1,5 @@
 package ru.deelter.lisskins.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
@@ -10,6 +8,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
+import java.util.List;
+
+/**
+ * Response containing purchase information.
+ */
 @Data
 @Builder
 @Jacksonized
@@ -17,5 +20,9 @@ import lombok.extern.jackson.Jacksonized;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class InfoResponse {
-    private List<Purchase> data;
+
+	/**
+	 * List of purchases matching the requested identifiers.
+	 */
+	private List<Purchase> data;
 }

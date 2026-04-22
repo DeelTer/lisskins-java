@@ -9,15 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * Ответ на запрос баланса.
- *
- * <pre>{@code
- * {
- *   "data": {
- *     "balance": 99.96
- *   }
- * }
- * }</pre>
+ * Response for a balance request.
  */
 @Data
 @Builder
@@ -27,14 +19,18 @@ import lombok.extern.jackson.Jacksonized;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BalanceResponse {
 
-    private Balance data;
+	private Balance data;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class Balance {
-        private Double balance;
-    }
+	@Data
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+	public static class Balance {
+
+		/**
+		 * Current user balance in USD.
+		 */
+		private Double balance;
+	}
 }

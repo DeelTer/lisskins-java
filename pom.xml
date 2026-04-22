@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ru.deelter.lisskins</groupId>
-  <artifactId>lisskins-client</artifactId>
-  <version>1.0.3</version>
+  <artifactId>lisskins-java</artifactId>
+  <version>1.0.4</version>
   <packaging>jar</packaging>
 
   <name>Lisskins Java Client</name>
